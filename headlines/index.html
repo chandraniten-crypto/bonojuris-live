@@ -52,6 +52,7 @@
     <button role="tab" data-cat="india" aria-selected="true">India</button>
     <button role="tab" data-cat="world" aria-selected="false">World</button>
     <button role="tab" data-cat="business" aria-selected="false">Business</button>
+    <button role="tab" data-cat="video" aria-selected="false">Video</button>
   </div>
 
   <div class="bar"><span id="updated">Loading…</span><span>Auto-refreshes every 5 minutes</span></div>
@@ -106,7 +107,38 @@
     });
   }
 
+  // Video tab: latest uploads of each publisher's official YouTube channel, embedded with YouTube's own player.
+  var CHANNELS = [
+    {name:'DW News',               id:'UCknLrEdhRCp1aegoMqRaCZg'},
+    {name:'Al Jazeera English',    id:'UCNye-wNBqNL5ZzHSJj3l8Bg'},
+    {name:'BBC News',              id:'UC16niRr50-MSBwiO3YDb3RA'},
+    {name:'Bloomberg Television',  id:'UCIALMKvObZNtJ6AmdCLP7Lg'}
+  ];
+  function showVideo(idx){
+    clearTimeout(timer);
+    list.textContent = '';
+    var pick = el('div','tabs');
+    CHANNELS.forEach(function(c,i){
+      var b = el('button',null,c.name); b.setAttribute('aria-selected', i===idx ? 'true':'false');
+      b.addEventListener('click', function(){ showVideo(i); });
+      pick.appendChild(b);
+    });
+    list.appendChild(pick);
+    var c = CHANNELS[idx];
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/videoseries?list=UU' + c.id.slice(2);
+    f.title = c.name + ' on YouTube: latest videos';
+    f.loading = 'lazy'; f.allowFullscreen = true;
+    f.setAttribute('allow','encrypted-media; picture-in-picture; fullscreen');
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    f.style.cssText = 'width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:6px;background:#000';
+    list.appendChild(f);
+    list.appendChild(el('p','sub','Latest uploads from the official ' + c.name + ' YouTube channel. Videos belong to their publishers and play in YouTube\'s own player; playing them connects your browser to YouTube.'));
+    updated.textContent = 'Latest uploads'; statusEl.textContent = '';
+  }
+
   function load(){
+    if(cat === 'video'){ showVideo(0); return; }
     updated.textContent = 'Loading…';
     fetch('feed.php?cat=' + encodeURIComponent(cat), {cache:'no-store'})
       .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
