@@ -2,7 +2,7 @@
 /**
  * Bono Juris monthly economics layer.
  * Source: Bank for International Settlements (BIS) open statistics, SDMX REST API v2, no key.
- *   - WS_CBPOL    central bank policy rates (covers 6 of the 8 economies; NOT Singapore, Taiwan)
+ *   - WS_CBPOL    central bank policy rates (covers 6 of the 8 economies; NOT Singapore, Taiwan; Taiwan comes from the CBC DataAPI)
  *   - WS_LONG_CPI consumer price index, monthly (covers 7 of 8; NOT Taiwan)
  * Inflation is computed here as the 12-month change of the BIS index. Nothing is estimated:
  * where BIS has no series, the economy simply has no value.
@@ -23,7 +23,7 @@ $ECON = [
 ];
 $NOTES = [
   'SGP' => 'Not in the BIS policy-rate dataset (monetary policy is run through the exchange rate, not a policy rate).',
-  'TWN' => 'Not covered by the BIS policy-rate or consumer-price datasets.',
+  'TWN' => 'Policy rate: Central Bank of the Republic of China (Taiwan) discount rate. No monthly inflation series from a source this page can read automatically.',
 ];
 
 $cacheDir = __DIR__ . '/cache';
@@ -94,6 +94,29 @@ function parse_sdmx_csv(?string $csv, ?string $unitContains = null): array {
   return $out;
 }
 
+/** Taiwan discount rate from the Central Bank of the Republic of China (Taiwan) DataAPI (item EG2AM01en). */
+function fetch_cbc(string $dir): array {
+  $u = 'https://cpx.cbc.gov.tw/API/DataAPI/Get?FileName=EG2AM01en'; $p = $dir . '/cbc_' . md5($u) . '.json';
+  if (is_file($p) && time() - filemtime($p) < TTL) return [json_decode(file_get_contents($p), true), 'cached'];
+  $ch = curl_init($u);
+  curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 3,
+    CURLOPT_TIMEOUT => TIMEOUT, CURLOPT_CONNECTTIMEOUT => 6, CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+    CURLOPT_USERAGENT => 'BonoJurisEconomics/1.0 (+https://bonojuris.com)']);
+  $body = curl_exec($ch); $code = curl_getinfo($ch, CURLINFO_HTTP_CODE); curl_close($ch);
+  $j = $body ? json_decode($body, true) : null;
+  if ($code === 200 && isset($j['data']['dataSets'])) { @file_put_contents($p, $body, LOCK_EX); return [$j, 'live']; }
+  if (is_file($p)) return [json_decode(file_get_contents($p), true), 'stale (HTTP ' . $code . ')'];
+  return [null, 'failed (HTTP ' . $code . ')'];
+}
+// Column 1 of that table is the discount rate (confirmed from the table's own structure block).
+[$cbcJ, $cbcStatus] = fetch_cbc($cacheDir);
+$twPol = [];
+if ($cbcJ && ($cbcJ['data']['dataSets'] ?? null)) {
+  foreach ($cbcJ['data']['dataSets'] as $r) {
+    if (isset($r[0], $r[1]) && preg_match('/^(\d{4})M(\d{2})$/', $r[0], $m) && is_numeric($r[1])) $twPol[$m[1] . '-' . $m[2]] = (float)$r[1];
+  }
+}
+
 $got = fetch_many($URL, $cacheDir);
 $polD = parse_sdmx_csv($got['pol_d']['body']);
 $polM = parse_sdmx_csv($got['pol_m']['body']);
@@ -118,6 +141,12 @@ foreach ($ECON as $key => [$label, $area]) {
     if ($row['policy'] === null) $row['policy'] = last_obs($m) + ['freq' => 'monthly'];
   }
 
+  if ($key === 'TWN' && $twPol) {
+    ksort($twPol);
+    foreach ($twPol as $per => $v) if ($per >= $histFrom) $row['policy_series'][] = [$per, round($v, 2)];
+    $k = array_key_last($twPol); $row['policy'] = ['date' => $k, 'value' => round($twPol[$k], 2), 'freq' => 'monthly'];
+  }
+
   // Inflation: 12-month change of the BIS CPI index.
   if (!empty($cpiM[$area])) {
     $idx = []; foreach ($cpiM[$area] as $per => $v) { if (preg_match('/^\d{4}-\d{2}$/', $per)) $idx[$per] = $v; }
@@ -135,11 +164,12 @@ echo json_encode([
   'generated_at' => gmdate('c'),
   'source'       => 'Bank for International Settlements (BIS): central bank policy rates; long consumer prices series',
   'source_url'   => 'https://data.bis.org',
-  'attribution'  => 'Sources: National sources; BIS long consumer prices database; BIS central bank policy rates.',
+  'attribution'  => 'Sources: National sources; BIS long consumer prices database; BIS central bank policy rates; Taiwan policy rate from the Central Bank of the Republic of China (Taiwan), Open Government Data License v1.0.',
   'status'       => [
     ['source' => 'Policy rates (daily)',   'status' => $got['pol_d']['status']],
     ['source' => 'Policy rates (monthly)', 'status' => $got['pol_m']['status']],
     ['source' => 'Consumer prices',        'status' => $got['cpi_m']['status']],
+    ['source' => 'Taiwan discount rate (CBC)', 'status' => $cbcStatus],
   ],
   'economies'    => $econ,
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
