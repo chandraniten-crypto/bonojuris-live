@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Economies Compared · Bono Juris</title>
+<meta name="description" content="India, China, South Korea, Singapore, Hong Kong, Taiwan, the euro area and the United States compared on growth, inflation, unemployment, external balance and public debt.">
+<style>
+  :root{--bg:#f7f5f0;--ink:#1c1c1c;--muted:#5d5d5d;--line:#ddd8cc;--accent:#7a1f1f;--card:#fff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Georgia,"Times New Roman",serif}
+  header{background:var(--card);border-bottom:1px solid var(--line)}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:14px 0;gap:12px;flex-wrap:wrap}
+  .brand{font-weight:700;color:var(--accent);text-decoration:none;font-size:20px}
+  nav a{margin-left:18px;color:var(--ink);text-decoration:none;font:14px system-ui,sans-serif}
+  nav a.on{color:var(--accent);font-weight:600;border-bottom:2px solid var(--accent)}
+  h1{margin:28px 0 4px;font-size:30px}
+  .sub{color:var(--muted);margin:0 0 16px;font:14px system-ui,sans-serif}
+  .controls{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0;font:14px system-ui,sans-serif;align-items:center}
+  select{font:14px system-ui,sans-serif;padding:7px 10px;border:1px solid var(--line);border-radius:5px;background:var(--card)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px 16px;margin-bottom:18px}
+  .card h2{font:600 15px system-ui,sans-serif;margin:0 0 10px;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+  table{border-collapse:collapse;width:100%;font:14px system-ui,sans-serif}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{font-weight:600;cursor:pointer;vertical-align:bottom}
+  th small{display:block;color:var(--muted);font-weight:400}
+  th.sel{color:var(--accent);border-bottom:2px solid var(--accent)}
+  td.sel{background:#fbf6ec}
+  td.na{color:#999}
+  .scroll{overflow-x:auto}
+  svg{width:100%;height:auto;display:block}
+  svg text{font:12px system-ui,sans-serif;fill:#333}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px;font:13px system-ui,sans-serif}
+  .legend button{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:14px;padding:3px 10px;cursor:pointer;font:inherit}
+  .legend button[aria-pressed=false]{opacity:.4}
+  .sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+  .status{font:12.5px system-ui,sans-serif;color:var(--muted);margin:6px 0}
+  .status .bad{color:#a11}
+  .note{font:13px/1.55 system-ui,sans-serif;color:var(--muted);background:#fbf8ee;border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin:8px 0 30px}
+  .note li{margin-bottom:4px}
+  footer{border-top:1px solid var(--line);padding:18px 0 30px;font:13px system-ui,sans-serif;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <a class="brand" href="/">Bono Juris</a>
+  <nav>
+    <a href="/">Books</a>
+    <a class="on" href="/live/economics/">Economics</a>
+    <a href="/live/headlines/">Headlines</a>
+    <a href="/live/markets/">Markets</a>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <h1>Economies Compared</h1>
+  <p class="sub">India, China, South Korea, Singapore, Hong Kong, Taiwan, the euro area and the United States, on one yardstick. Source: IMF World Economic Outlook.</p>
+
+  <div class="controls">
+    <label>Indicator <select id="indSel"></select></label>
+    <label>Year <select id="yrSel"></select></label>
+    <span class="status" id="stamp"></span>
+  </div>
+
+  <div class="card">
+    <h2>Scorecard</h2>
+    <div class="scroll"><table id="tbl"></table></div>
+  </div>
+
+  <div class="card">
+    <h2 id="barTitle">Ranking</h2>
+    <svg id="bar" viewBox="0 0 760 330" role="img" aria-label="Bar chart comparing the eight economies"></svg>
+  </div>
+
+  <div class="card">
+    <h2 id="lineTitle">Trend</h2>
+    <svg id="line" viewBox="0 0 760 360" role="img" aria-label="Line chart of the selected indicator over time"></svg>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <h1 style="font-size:24px;margin-top:34px">Latest monthly readings</h1>
+  <p class="sub">Most recent inflation and central-bank policy rates. Source: Bank for International Settlements (BIS).</p>
+
+  <div class="card">
+    <h2>Inflation and policy rate</h2>
+    <div class="scroll"><table id="mtbl"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Consumer-price inflation, 12-month change (%)</h2>
+    <svg id="cpiLine" viewBox="0 0 760 330" role="img" aria-label="Line chart of 12-month consumer price inflation"></svg>
+    <div class="legend" id="cpiLegend"></div>
+  </div>
+
+  <div class="card">
+    <h2>Central-bank policy rates (%)</h2>
+    <svg id="polLine" viewBox="0 0 760 330" role="img" aria-label="Line chart of central bank policy rates"></svg>
+    <div class="legend" id="polLegend"></div>
+  </div>
+
+  <div class="status" id="mstatus"></div>
+  <div class="status" id="status"></div>
+
+  <div class="note">
+    <strong>How to read this page</strong>
+    <ol>
+      <li>Figures are annual, from the IMF's World Economic Outlook. Recent and future years are IMF estimates and projections, not outturns.</li>
+      <li>The page shows the IMF's own series so that all eight economies use one definition. National statistics offices publish later or earlier releases and may differ, and revisions are routine.</li>
+      <li>Fiscal-year economies (India reports on an April–March basis in its national accounts) may be calendarised differently by the IMF.</li>
+      <li>"Taiwan" is shown as the IMF lists it, "Taiwan Province of China". "—" means the IMF has no value for that cell; nothing is estimated here.</li>
+      <li>Monthly inflation is the 12-month change in the BIS consumer-price index for each economy's main national index, calculated here from BIS data. It is not seasonally adjusted and may differ from a national office's headline figure or release date.</li>
+      <li>Policy rates are the BIS-reported main policy rate: India's repo rate, China's one-year Loan Prime Rate, Korea's base rate, Hong Kong's base rate, the mid-point of the Federal Reserve target range, and the ECB deposit facility rate. Singapore and Taiwan are not in the BIS policy-rate dataset, and Taiwan is also not in its consumer-price dataset, so those cells are empty.</li>
+      <li>Figures for current and future years are IMF estimates and projections and are revised often. Information only. Bono Juris is not a SEBI-registered investment adviser or research analyst; nothing here is investment, legal or policy advice.</li>
+    </ol>
+    <span id="attr"></span> Source: <a id="srcLink" href="https://www.imf.org/external/datamapper" rel="noopener">IMF DataMapper</a>. This page is not affiliated with or endorsed by the IMF or the BIS.
+  </div>
+</main>
+
+<footer><div class="wrap">© Bono Juris · <a href="/">Back to the bookstore</a></div></footer>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var COLORS=['#7a1f1f','#1f5f8b','#2e7d32','#e08a00','#6a1b9a','#00838f','#c2185b','#455a64'];
+  var D=null, ind=null, yr=null, hidden={};
+
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e;}
+  function s(t,a,x){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(x!=null)e.textContent=x;return e;}
+  function fmt(v){return v==null?'—':(Math.round(v*10)/10).toFixed(1);}
+  function indMeta(c){return D.indicators.filter(function(i){return i.code===c;})[0];}
+  function colorOf(i){return COLORS[i%COLORS.length];}
+
+  function fillControls(){
+    var is=document.getElementById('indSel'), ys=document.getElementById('yrSel');
+    D.indicators.forEach(function(i){var o=el('option',null,i.label);o.value=i.code;is.appendChild(o);});
+    D.years.slice().reverse().forEach(function(y){var o=el('option',null,String(y));o.value=y;ys.appendChild(o);});
+    ind=D.indicators[0].code;
+    var now=new Date().getFullYear(); yr=D.years.indexOf(now)>-1?now:D.years[D.years.length-1];
+    is.value=ind; ys.value=yr;
+    is.onchange=function(){ind=is.value;draw();};
+    ys.onchange=function(){yr=parseInt(ys.value,10);draw();};
+  }
+
+  function table(){
+    var t=document.getElementById('tbl'); t.textContent='';
+    var thead=el('thead'), hr=el('tr'); hr.appendChild(el('th',null,'Economy'));
+    D.indicators.forEach(function(i){
+      var th=el('th',i.code===ind?'sel':null,i.label); th.appendChild(el('small',null,i.unit+', '+yr));
+      th.onclick=function(){ind=i.code;document.getElementById('indSel').value=ind;draw();};
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr); t.appendChild(thead);
+    var tb=el('tbody');
+    D.economies.forEach(function(e){
+      var tr=el('tr'); tr.appendChild(el('td',null,e.label));
+      D.indicators.forEach(function(i){
+        var v=e.data[i.code]?e.data[i.code][String(yr)]:null;
+        var cls=(i.code===ind?'sel ':'')+(v==null?'na':'');
+        tr.appendChild(el('td',cls.trim()||null,fmt(v)));
+      });
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+  }
+
+  function bar(){
+    var svg=document.getElementById('bar'); svg.textContent='';
+    var m=indMeta(ind);
+    document.getElementById('barTitle').textContent=m.label+', '+yr+' ('+m.unit+')';
+    var rows=D.economies.map(function(e,i){return {l:e.label,v:e.data[ind][String(yr)],c:colorOf(i)};});
+    rows.sort(function(a,b){return (b.v==null?-1e9:b.v)-(a.v==null?-1e9:a.v);});
+    var vals=rows.filter(function(r){return r.v!=null;}).map(function(r){return r.v;});
+    if(!vals.length){svg.appendChild(s('text',{x:20,y:40},'No data for this selection.'));return;}
+    var lo=Math.min(0,Math.min.apply(null,vals)), hi=Math.max(0,Math.max.apply(null,vals));
+    if(hi===lo){hi=lo+1;}
+    var L=130,R=60,T=10,rowH=36,W=760,pw=W-L-R;
+    function X(v){return L+(v-lo)/(hi-lo)*pw;}
+    var zero=X(0);
+    rows.forEach(function(r,i){
+      var y=T+i*rowH;
+      svg.appendChild(s('text',{x:L-10,y:y+rowH/2+4,'text-anchor':'end'},r.l));
+      if(r.v==null){svg.appendChild(s('text',{x:L+6,y:y+rowH/2+4,fill:'#999'},'—'));return;}
+      var x0=Math.min(zero,X(r.v)), w=Math.max(1,Math.abs(X(r.v)-zero));
+      svg.appendChild(s('rect',{x:x0,y:y+6,width:w,height:rowH-14,fill:r.c,rx:2}));
+      var lx=r.v>=0?x0+w+6:x0-6, anc=r.v>=0?'start':'end';
+      svg.appendChild(s('text',{x:lx,y:y+rowH/2+4,'text-anchor':anc},fmt(r.v)));
+    });
+    svg.appendChild(s('line',{x1:zero,x2:zero,y1:T,y2:T+rows.length*rowH,stroke:'#999'}));
+    svg.setAttribute('viewBox','0 0 760 '+(T*2+rows.length*rowH));
+  }
+
+  function line(){
+    var svg=document.getElementById('line'); svg.textContent='';
+    var m=indMeta(ind);
+    document.getElementById('lineTitle').textContent=m.label+' over time ('+m.unit+')';
+    var W=760,H=360,L=48,R=16,T=14,B=34,pw=W-L-R,ph=H-T-B;
+    var series=D.economies.map(function(e,i){return {e:e,i:i};}).filter(function(o){return !hidden[o.e.key];});
+    var all=[];
+    series.forEach(function(o){D.years.forEach(function(y){var v=o.e.data[ind][String(y)];if(v!=null)all.push(v);});});
+    if(!all.length){svg.appendChild(s('text',{x:20,y:40},'No data for this selection.'));return;}
+    var lo=Math.min(0,Math.min.apply(null,all)), hi=Math.max.apply(null,all);
+    var pad=(hi-lo)*0.08||1; hi+=pad; if(lo<0) lo-=pad;
+    var y0=D.years[0], y1=D.years[D.years.length-1];
+    function X(y){return L+(y-y0)/(y1-y0)*pw;}
+    function Y(v){return T+(hi-v)/(hi-lo)*ph;}
+    var step=(hi-lo)/5, mag=Math.pow(10,Math.floor(Math.log10(step))), nice=[1,2,5,10].map(function(k){return k*mag;}).filter(function(k){return k>=step;})[0]||step;
+    for(var g=Math.ceil(lo/nice)*nice; g<=hi; g+=nice){
+      svg.appendChild(s('line',{x1:L,x2:W-R,y1:Y(g),y2:Y(g),stroke:g===0?'#999':'#e6e1d6'}));
+      svg.appendChild(s('text',{x:L-6,y:Y(g)+4,'text-anchor':'end'},fmt(g)));
+    }
+    D.years.forEach(function(y,i){ if(i%2===0||y===y1) svg.appendChild(s('text',{x:X(y),y:H-12,'text-anchor':'middle'},String(y))); });
+    series.forEach(function(o){
+      var d='',pen=false;
+      D.years.forEach(function(y){
+        var v=o.e.data[ind][String(y)];
+        if(v==null){pen=false;return;}
+        d+=(pen?'L':'M')+X(y).toFixed(1)+' '+Y(v).toFixed(1)+' '; pen=true;
+      });
+      svg.appendChild(s('path',{d:d,fill:'none',stroke:colorOf(o.i),'stroke-width':2.2,'stroke-linejoin':'round'}));
+    });
+    // marker for the selected year
+    svg.appendChild(s('line',{x1:X(yr),x2:X(yr),y1:T,y2:T+ph,stroke:'#7a1f1f','stroke-dasharray':'4 4'}));
+  }
+
+  function legend(){
+    var lg=document.getElementById('legend'); lg.textContent='';
+    D.economies.forEach(function(e,i){
+      var b=el('button'); b.type='button'; b.setAttribute('aria-pressed',hidden[e.key]?'false':'true');
+      var sw=el('span','sw'); sw.style.background=colorOf(i); b.appendChild(sw); b.appendChild(document.createTextNode(e.label));
+      b.onclick=function(){hidden[e.key]=!hidden[e.key];legend();line();};
+      lg.appendChild(b);
+    });
+  }
+
+  function draw(){ table(); bar(); line(); legend(); }
+
+  function load(){
+    fetch('econ.php',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
+      D=d; fillControls(); draw();
+      var g=new Date(d.generated_at);
+      document.getElementById('stamp').textContent='Data checked '+g.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+      var st=document.getElementById('status'); st.textContent='';
+      d.status.forEach(function(x){
+        var bad=/failed|stale|not found/.test(x.status);
+        st.appendChild(el('span',bad?'bad':null,x.source+': '+x.status)); st.appendChild(document.createTextNode('   '));
+      });
+      if(/^https:\/\/www\.imf\.org\//.test(d.source_url)) document.getElementById('srcLink').href=d.source_url;
+    }).catch(function(){
+      document.getElementById('tbl').textContent='';
+      document.getElementById('stamp').textContent='Economic data is temporarily unavailable.';
+    });
+  }
+  load();
+
+  /* ---------- Monthly layer (BIS) ---------- */
+  var ME=null;
+  function mfmt(o,unit){return o?(o.value.toFixed(unit==='r'?2:1)+'%'):'—';}
+  function ymLabel(ym){var p=ym.split('-');return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(p[1],10)-1]+' '+p[0];}
+
+  function mTable(){
+    var t=document.getElementById('mtbl'); t.textContent='';
+    var hr=el('tr'); ['Economy','Inflation, 12-month','Month','Policy rate','As of'].forEach(function(h,i){var th=el('th',null,h); if(i===0)th.style.textAlign='left'; hr.appendChild(th);});
+    var th=el('thead'); th.appendChild(hr); t.appendChild(th);
+    var tb=el('tbody');
+    ME.economies.forEach(function(e){
+      var tr=el('tr'); tr.appendChild(el('td',null,e.label));
+      var c=e.cpi_latest, p=e.policy;
+      [c?mfmt(c,'c'):'—', c?ymLabel(c.date):'—', p?mfmt(p,'r'):'—', p?(p.freq==='daily'?p.date:ymLabel(p.date.slice(0,7))):'—'].forEach(function(v,i){
+        tr.appendChild(el('td',v==='—'?'na':null,v));
+      });
+      tb.appendChild(tr);
+      if(e.note && (!c || !p)){ var nr=el('tr'); var nc=el('td',null,e.label+': '+e.note); nc.colSpan=5; nc.style.textAlign='left'; nc.style.color='#777'; nc.style.fontSize='12.5px'; nr.appendChild(nc); tb.appendChild(nr); }
+    });
+    t.appendChild(tb);
+  }
+
+  function genericLine(svgId, legId, key, step){
+    var svg=document.getElementById(svgId); svg.textContent='';
+    var lg=document.getElementById(legId); lg.textContent='';
+    var W=760,H=330,L=48,R=16,T=14,B=34,pw=W-L-R,ph=H-T-B;
+    var periods={}, all=[];
+    ME.economies.forEach(function(e){(e[key]||[]).forEach(function(p){periods[p[0]]=1;all.push(p[1]);});});
+    var labels=Object.keys(periods).sort();
+    if(!labels.length){svg.appendChild(s('text',{x:20,y:40},'No data available.'));return;}
+    var lo=Math.min(0,Math.min.apply(null,all)), hi=Math.max.apply(null,all), pad=(hi-lo)*0.08||1; hi+=pad; if(lo<0)lo-=pad;
+    function X(i){return L+(labels.length>1?i/(labels.length-1):0)*pw;}
+    function Y(v){return T+(hi-v)/(hi-lo)*ph;}
+    var st=(hi-lo)/5, mag=Math.pow(10,Math.floor(Math.log10(st))), nice=[1,2,5,10].map(function(k){return k*mag;}).filter(function(k){return k>=st;})[0]||st;
+    for(var g=Math.ceil(lo/nice)*nice; g<=hi; g+=nice){
+      svg.appendChild(s('line',{x1:L,x2:W-R,y1:Y(g),y2:Y(g),stroke:g===0?'#999':'#e6e1d6'}));
+      svg.appendChild(s('text',{x:L-6,y:Y(g)+4,'text-anchor':'end'},(Math.round(g*10)/10).toFixed(1)));
+    }
+    labels.forEach(function(lb,i){ if(i%step===0) svg.appendChild(s('text',{x:X(i),y:H-12,'text-anchor':(i===labels.length-1?'end':'middle')},ymLabel(lb).replace(/ (\d\d)(\d\d)$/,' $2'))); });
+    ME.economies.forEach(function(e,ei){
+      var ser=e[key]||[]; if(!ser.length) return;
+      var map={}; ser.forEach(function(p){map[p[0]]=p[1];});
+      var d='',pen=false;
+      labels.forEach(function(lb,i){ var v=map[lb]; if(v==null){pen=false;return;} d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' '; pen=true; });
+      svg.appendChild(s('path',{d:d,fill:'none',stroke:colorOf(ei),'stroke-width':2.2,'stroke-linejoin':'round'}));
+      var b=el('span'); b.style.cssText='display:flex;align-items:center;gap:6px;font:13px system-ui,sans-serif';
+      var sw=el('span','sw'); sw.style.background=colorOf(ei); b.appendChild(sw); b.appendChild(document.createTextNode(e.label)); lg.appendChild(b);
+    });
+  }
+
+  function loadMonthly(){
+    fetch('econ_monthly.php',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(d){
+      ME=d; mTable(); genericLine('cpiLine','cpiLegend','cpi_series',6); genericLine('polLine','polLegend','policy_series',12);
+      var st=document.getElementById('mstatus'); st.textContent='';
+      d.status.forEach(function(x){var bad=/failed|stale/.test(x.status); st.appendChild(el('span',bad?'bad':null,x.source+': '+x.status)); st.appendChild(document.createTextNode('   '));});
+      document.getElementById('attr').textContent=d.attribution;
+    }).catch(function(){ document.getElementById('mtbl').textContent=''; document.getElementById('mstatus').textContent='Monthly data is temporarily unavailable.'; });
+  }
+  loadMonthly();
+})();
+</script>
+</body>
+</html>
