@@ -134,8 +134,13 @@
     f.loading = 'lazy'; f.allowFullscreen = true;
     f.setAttribute('allow','encrypted-media; picture-in-picture; fullscreen');
     f.referrerPolicy = 'strict-origin-when-cross-origin';
-    f.style.cssText = 'width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:6px;background:#000';
-    list.appendChild(f);
+    f.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent';
+    var box = el('div');
+    box.style.cssText = 'position:relative;width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:6px;background:#111;overflow:hidden';
+    var msg = el('div',null,'Loading video\u2026 the first load can take up to 30 seconds.');
+    msg.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;color:#ddd;font:14px system-ui,sans-serif';
+    box.appendChild(msg); box.appendChild(f);
+    list.appendChild(box);
     list.appendChild(el('p','sub','Latest uploads from the official ' + c.name + ' YouTube channel. Videos belong to their publishers and play in YouTube\'s own player; playing them connects your browser to YouTube.'));
     updated.textContent = 'Latest uploads'; statusEl.textContent = '';
   }
